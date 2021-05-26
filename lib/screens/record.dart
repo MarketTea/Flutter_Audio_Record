@@ -15,6 +15,7 @@ class Record extends StatefulWidget {
 
 class _RecordState extends State<Record> {
   IconData _iconData = Icons.mic;
+  IconData _iconPause = Icons.pause;
   bool _isRecording = false;
   String _recordLabel = 'Press the button to record';
   Stopwatch _stopwatch = Stopwatch();
@@ -28,6 +29,7 @@ class _RecordState extends State<Record> {
           _stopwatch.start();
           _isRecording = true;
           _iconData = Icons.stop;
+          _visible = !_visible;
         } else {
           _recordLabel = 'Press the button to record';
           _stopwatch.reset();
@@ -35,6 +37,7 @@ class _RecordState extends State<Record> {
           _stopwatch.stop();
           _isRecording = false;
           _iconData = Icons.mic;
+          _visible = !_visible;
         }
       });
     } else {
@@ -62,12 +65,30 @@ class _RecordState extends State<Record> {
         "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
   }
 
+  Future<void> _resume() async {
+    Recording recording = await AudioRecorder.resume();
+    Scaffold.of(context).showSnackBar(
+        new SnackBar(content: new Text("File Saved Successfully.")));
+    print(
+        "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
+  }
+
+  Future<void> _pause() async {
+    Recording recording = await AudioRecorder.pause();
+    Scaffold.of(context).showSnackBar(
+        new SnackBar(content: new Text("File Saved Successfully.")));
+    print(
+        "Path : ${recording.path},  Format : ${recording.audioOutputFormat},  Duration : ${recording.duration},  Extension : ${recording.extension},");
+  }
+
   String fileName() {
     var now = new DateTime.now();
     var formatter = new DateFormat('yyyy-MM-dd');
     String formattedDate = formatter.format(now);
-    return 'Recording_$formattedDate.mp4';
+    return 'Recording_$formattedDate--${now.hour}:${now.minute}:${now.second}.mp4';
   }
+
+  bool _visible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -82,17 +103,38 @@ class _RecordState extends State<Record> {
           _recordLabel,
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        CircleAvatar(
-          backgroundColor: Colors.teal[400],
-          radius: 30,
-          child: IconButton(
-            onPressed: _recordButtonPress,
-            padding: EdgeInsets.zero,
-            icon: Icon(
-              _iconData,
-              color: Colors.white,
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircleAvatar(
+              backgroundColor: Colors.teal[400],
+              radius: 30,
+              child: IconButton(
+                onPressed: _recordButtonPress,
+                padding: EdgeInsets.zero,
+                icon: Icon(
+                  _iconData,
+                  color: Colors.white,
+                ),
+              ),
             ),
-          ),
+            SizedBox(width: 12.0),
+            Visibility(
+                visible: _visible,
+                child: CircleAvatar(
+                  backgroundColor: Colors.teal[400],
+                  radius: 20,
+                  child: IconButton(
+                    onPressed: null,
+                    padding: EdgeInsets.zero,
+                    icon: Icon(
+                      _iconPause,
+                      color: Colors.white,
+                    ),
+                  ),
+                ))
+          ],
         )
       ],
     );
