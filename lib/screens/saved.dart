@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io' as io;
@@ -24,6 +26,7 @@ class _SavedState extends State<Saved> {
   // Make New Function
   void _listOfFiles() async {
     String directory = (await getApplicationDocumentsDirectory()).path;
+    print("Directory--------------- $directory");
     setState(() {
       file = io.Directory("$directory/")
           .listSync()
@@ -31,6 +34,31 @@ class _SavedState extends State<Saved> {
           .toList();
     });
     print("Directory Path is $file");
+  }
+
+  Future<File> get _localFile async {
+    final abc = _listOfFiles;
+    print('ABC------------------------ $abc');
+    return File('$abc');
+  }
+
+  Future<void> deleteFile() async {
+    try {
+      final file = await _localFile;
+      await file.delete();
+    } catch (e) {
+      // Error in getting access to the file.
+    }
+  }
+
+  Future<void> deleteFiles(File file) async {
+    try {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      // Error in getting access to the file.
+    }
   }
 
   @override
@@ -46,6 +74,7 @@ class _SavedState extends State<Saved> {
             onDismissed: (direction) {
               setState(() {
                 file.removeAt(index);
+                //deleteFile();
               });
               ScaffoldMessenger.of(context)
                   .showSnackBar(SnackBar(content: Text('$item dismissed')));
